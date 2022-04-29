@@ -30,4 +30,19 @@ router.get("/:userId", (req: Request, res: Response) => {
   );
 });
 
+router.get("/club/:clubId", (req: Request, res: Response) => {
+  const clubId = req.params.clubId;
+
+  connection.query(
+    `SELECT teamId, name FROM teams WHERE clubId = "${clubId}"`,
+    (error, results) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.send(results);
+      }
+    }
+  );
+});
+
 module.exports = router;

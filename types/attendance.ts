@@ -4,6 +4,7 @@ interface Attendance {
   eventId: string;
   isComing: boolean;
   date: string;
+  excuseNote: string | null | undefined;
 }
 
 export default Attendance;

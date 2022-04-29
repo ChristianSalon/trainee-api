@@ -11,11 +11,16 @@ const connection = mysql.createConnection({
   database: "trainee",
 });
 
-router.get("/:search", (req: Request, res: Response) => {
+router.get("/team/:teamId/:search", (req: Request, res: Response) => {
+  const teamId = req.params.teamId;
   const search = req.params.search;
 
   connection.query(
-    `SELECT * FROM users WHERE name LIKE "%${search}%"`,
+    `SELECT * FROM users WHERE name LIKE "%${search}%" 
+    AND userId NOT IN 
+    (SELECT userId FROM teams_users WHERE teamId = "${teamId}") 
+    AND userId NOT IN 
+    (SELECT userId FROM requests WHERE teamId = "${teamId}");`,
     (error, results) => {
       if (error) {
         console.log(error);
@@ -37,6 +42,23 @@ router.post("/", (req: Request, res: Response) => {
         console.log(error);
       } else {
         res.send("New User Created.");
+      }
+    }
+  );
+});
+
+router.put("/editName/:userId", (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const name: string = req.body.name;
+
+  connection.query(
+    `UPDATE users SET name = ? WHERE userId = ?`,
+    [name, userId],
+    (error) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.send("User Name Updated.");
       }
     }
   );

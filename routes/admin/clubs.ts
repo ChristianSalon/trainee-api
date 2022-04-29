@@ -15,7 +15,7 @@ router.get("/:userId", (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   connection.query(
-    `SELECT c.clubId, c.name, c.photoURL FROM clubs_users AS cu 
+    `SELECT c.* FROM clubs_users AS cu 
     INNER JOIN clubs AS c ON cu.clubId = c.clubId 
     INNER JOIN users AS u ON cu.userId = u.userId 
     WHERE u.userId = "${userId}" AND cu.role = "MANAGER"`,

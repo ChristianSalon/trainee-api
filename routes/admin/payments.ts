@@ -11,14 +11,18 @@ const connection = mysql.createConnection({
   database: "trainee",
 });
 
-router.get("/team/:teamId", (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
+router.get("/club/:clubId", (req: Request, res: Response) => {
+  const clubId = req.params.clubId;
 
   connection.query(
-    `SELECT p.*, pt.teamId FROM payments_teams AS pt 
+    `SELECT p.*, GROUP_CONCAT(t.teamId SEPARATOR ', ') AS "teamIds" FROM payments_teams AS pt 
     INNER JOIN payments AS p ON pt.paymentId = p.paymentId 
-    WHERE pt.teamId = '${teamId}' 
-    ORDER BY p.dueDate DESC`,
+    INNER JOIN teams AS t ON pt.teamId = t.teamId 
+    INNER JOIN clubs AS c ON t.clubId = c.clubId 
+    WHERE c.clubId = ? 
+    GROUP BY p.paymentId 
+    ORDER BY p.dueDate DESC;`,
+    [clubId],
     (error, results) => {
       if (error) {
         console.log(error);
@@ -47,38 +51,44 @@ router.get("/teams/:userId", (req: Request, res: Response) => {
   );
 });
 
+router.get("/:paymentId", (req: Request, res: Response) => {
+  const paymentId = req.params.paymentId;
+
+  connection.query(
+    `SELECT pu.id, u.name, u.photoURL, pu.settledAt FROM payments_users AS pu
+    INNER JOIN users AS u ON pu.userId = u.userId
+    WHERE pu.paymentId = ?
+    GROUP BY u.userId;`,
+    [paymentId],
+    (error, results) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.send(results);
+      }
+    }
+  );
+});
+
 router.post("/", (req: Request, res: Response) => {
   const payment: Payment = req.body;
   let paymentId;
 
   connection.query(
-    `INSERT INTO payments (name, details, amount, createdAt, dueDate) 
-    VALUES (?, ?, ?, ?, ?)`,
+    `CALL createPayment(?, ?, ?, ?, ?, ?);`,
     [
       payment.name,
       payment.details,
       payment.amount,
       payment.createdAt,
       payment.dueDate,
+      payment.teamIds,
     ],
     (error, result) => {
       if (error) {
         console.log(error);
       } else {
-        paymentId = result.insertId;
         res.send("New Payment Created.");
-
-        payment.teams.forEach((teamId) => {
-          connection.query(
-            `INSERT INTO payments_teams (paymentId, teamId) VALUES (?, ?)`,
-            [paymentId, teamId],
-            (err) => {
-              if (err) {
-                console.log(err);
-              }
-            }
-          );
-        });
       }
     }
   );

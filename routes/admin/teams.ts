@@ -11,14 +11,16 @@ const connection = mysql.createConnection({
   database: "trainee",
 });
 
-router.get("/:userId", (req: Request, res: Response) => {
+router.get("/club/:clubId/user/:userId", (req: Request, res: Response) => {
+  const clubId = req.params.clubId;
   const userId = req.params.userId;
 
   connection.query(
     `SELECT t.teamId, t.clubId, t.name, t.photoURL FROM teams_users AS tu 
     INNER JOIN teams AS t ON tu.teamId = t.teamId 
     INNER JOIN users AS u ON tu.userId = u.userId 
-    WHERE u.userId = "${userId}" AND tu.role = "MANAGER"`,
+    WHERE u.userId = ? AND tu.role = ? AND t.clubId = ?;`,
+    [userId, "MANAGER", clubId],
     (error, results) => {
       if (error) {
         console.log(error);

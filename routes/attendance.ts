@@ -49,12 +49,13 @@ router.post("/", (req: Request, res: Response) => {
   const attendance: Attendance = req.body;
 
   connection.query(
-    `INSERT INTO attendance (userId, eventId, isComing, date) VALUES (?, ?, ?, ?)`,
+    `INSERT INTO attendance (userId, eventId, isComing, date, excuseNote) VALUES (?, ?, ?, ?, ?)`,
     [
       attendance.userId,
       attendance.eventId,
       attendance.isComing,
       attendance.date,
+      attendance.excuseNote,
     ],
     (error) => {
       if (error) {
@@ -85,11 +86,13 @@ router.put("/:id", (req: Request, res: Response) => {
   const id = req.params.id;
   const isComing: boolean = req.body.isComing;
   const date: string = req.body.date;
+  const excuseNote: string = req.body.excuseNote;
 
   connection.query(
     `UPDATE attendance 
-    SET isComing = ${isComing}, date = '${date}' 
-    WHERE id = ${id}`,
+    SET isComing = ?, date = ?, excuseNote = ? 
+    WHERE id = ?;`,
+    [isComing, date, excuseNote, id],
     (error) => {
       if (error) {
         console.log(error);

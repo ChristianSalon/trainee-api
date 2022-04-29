@@ -30,14 +30,12 @@ router.get("/:teamId", (req: Request, res: Response) => {
   );
 });
 
-router.post("/:teamId", (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
+router.post("/", (req: Request, res: Response) => {
   const event: Event = req.body;
 
   connection.query(
-    `CALL createEvent(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `CALL createEvent(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      teamId,
       event.eventId,
       event.name,
       event.details,
@@ -52,6 +50,17 @@ router.post("/:teamId", (req: Request, res: Response) => {
       if (error) {
         console.log(error);
       } else {
+        event.teams.forEach((teamId) => {
+          connection.query(
+            `INSERT INTO events_teams (teamId, eventId) VALUES (?, ?);`,
+            [teamId, event.eventId],
+            (err) => {
+              if (err) {
+                console.log(err);
+              }
+            }
+          );
+        });
         res.send("New Event Created.");
       }
     }

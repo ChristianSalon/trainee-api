@@ -1,4 +1,5 @@
 interface Event {
+  teams: string[];
   eventId: string;
   name: string;
   details: string | null;
