@@ -85,26 +85,26 @@ router.post(
       return;
     }
 
-    // Handle the event
-    /*switch (event.type) {
+    console.log(event);
+    let paymentIntent;
+
+    switch (event.type) {
       case "payment_intent.payment_failed":
-        const paymentIntent = event.data.object;
-        // Then define and call a function to handle the event payment_intent.payment_failed
+        paymentIntent = event.data.object;
+        console.log("Payment failed");
         break;
       case "payment_intent.processing":
-        const paymentIntent = event.data.object;
-        // Then define and call a function to handle the event payment_intent.processing
+        paymentIntent = event.data.object;
+        console.log("Payment processing");
         break;
       case "payment_intent.succeeded":
-        const paymentIntent = event.data.object;
-        // Then define and call a function to handle the event payment_intent.succeeded
+        paymentIntent = event.data.object;
+        console.log("Payment succeeded");
         break;
-      // ... handle other event types
       default:
         console.log(`Unhandled event type ${event.type}`);
-    }*/
+    }
 
-    // Return a 200 response to acknowledge receipt of the event
     response.send();
   }
 );
