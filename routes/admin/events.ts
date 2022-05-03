@@ -22,7 +22,7 @@ router.get("/:teamId", (req: Request, res: Response) => {
     WHERE et.teamId = "${teamId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -48,7 +48,7 @@ router.post("/", (req: Request, res: Response) => {
     ],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         event.teams.forEach((teamId) => {
           connection.query(
@@ -72,7 +72,7 @@ router.delete("/:eventId", (req: Request, res: Response) => {
 
   connection.query(`CALL deleteEvent(?)`, [eventId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Event Deleted.");
     }
@@ -97,7 +97,7 @@ router.put("/:eventId", (req: Request, res: Response) => {
     ],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Event Updated.");
       }

@@ -31,7 +31,7 @@ router.get("/team/:teamId/user/:userId", (req: Request, res: Response) => {
     ORDER BY p.dueDate DESC`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -55,6 +55,9 @@ router.post("/", async (req, res) => {
     application_fee_amount: 0,
     transfer_data: {
       destination: paymentInfo.accountId,
+    },
+    metadata: {
+      paymentId: paymentInfo.paymentId,
     },
   });
 
@@ -92,20 +95,32 @@ router.post(
       case "payment_intent.payment_failed":
         paymentIntent = event.data.object;
         console.log("Payment failed");
+        response.sendStatus(200);
         break;
       case "payment_intent.processing":
         paymentIntent = event.data.object;
         console.log("Payment processing");
+        response.sendStatus(200);
         break;
       case "payment_intent.succeeded":
         paymentIntent = event.data.object;
         console.log("Payment succeeded");
+        connection.query(
+          `UPDATE payments_users AS pu SET pu.settledAt = ?
+          INNER JOIN users AS u ON pu.userId = u.userId
+          WHERE u.customerId = ? AND pu.paymentId = ?;`,
+          [
+            new Date().toISOString().split("T")[0],
+            paymentIntent.customer,
+            paymentIntent.metadata.paymentId,
+          ]
+        );
+        response.send();
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);
+        response.sendStatus(200);
     }
-
-    response.send();
   }
 );
 

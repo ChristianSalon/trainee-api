@@ -23,7 +23,7 @@ router.get("/club/:clubId/user/:userId", (req: Request, res: Response) => {
     [userId, "MANAGER", clubId],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -40,7 +40,7 @@ router.post("/:userId", (req: Request, res: Response) => {
     [team.teamId, team.clubId, team.name, team.photoURL, userId, "MANAGER"],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Team Created.");
       }
@@ -53,7 +53,7 @@ router.delete("/:teamId", (req: Request, res: Response) => {
 
   connection.query(`CALL deleteTeam(?)`, [teamId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Team Deleted.");
     }
@@ -70,7 +70,7 @@ router.put("/:teamId", (req: Request, res: Response) => {
     WHERE teamId = '${teamId}'`,
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Team Updated.");
       }

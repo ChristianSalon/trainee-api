@@ -23,7 +23,7 @@ router.get("/:userId", async (req: Request, res: Response) => {
     `SELECT customerId FROM users WHERE userId = "${userId}" LIMIT 1`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -44,7 +44,7 @@ router.post("/", async (req: Request, res: Response) => {
     [customer.id],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       }
     }
   );

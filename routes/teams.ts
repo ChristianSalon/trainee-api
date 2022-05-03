@@ -10,6 +10,13 @@ const connection = mysql.createConnection({
   password: "password",
   database: "trainee",
 });
+connection.connect((err) => {
+  if (err) {
+    console.log("Connection error message: " + err.message);
+    return;
+  }
+  console.log("Connected!");
+});
 
 router.get("/:userId", (req: Request, res: Response) => {
   const userId = req.params.userId;
@@ -22,7 +29,7 @@ router.get("/:userId", (req: Request, res: Response) => {
     WHERE u.userId = "${userId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -37,7 +44,7 @@ router.get("/club/:clubId", (req: Request, res: Response) => {
     `SELECT teamId, name FROM teams WHERE clubId = "${clubId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }

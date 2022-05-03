@@ -25,7 +25,7 @@ router.get("/club/:clubId", (req: Request, res: Response) => {
     [clubId],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -43,7 +43,7 @@ router.get("/teams/:userId", (req: Request, res: Response) => {
     WHERE u.userId = "${userId}" AND tu.role = "MANAGER"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -62,7 +62,7 @@ router.get("/:paymentId", (req: Request, res: Response) => {
     [paymentId],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -86,7 +86,7 @@ router.post("/", (req: Request, res: Response) => {
     ],
     (error, result) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Payment Created.");
       }
@@ -99,7 +99,7 @@ router.delete("/:paymentId", (req: Request, res: Response) => {
 
   connection.query(`CALL deletePayment(?)`, [paymentId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Payment Deleted.");
     }
@@ -117,7 +117,7 @@ router.put("/:paymentId", (req: Request, res: Response) => {
     [payment.name, payment.details, payment.amount, payment.dueDate],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Payment Updated.");
       }

@@ -21,7 +21,7 @@ router.get("/:eventId", (req: Request, res: Response) => {
     WHERE a.eventId = "${eventId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -37,7 +37,7 @@ router.get("/myAttendance/:userId", (req: Request, res: Response) => {
     WHERE userId = "${userId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -59,7 +59,7 @@ router.post("/", (req: Request, res: Response) => {
     ],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Attendance Created.");
       }
@@ -74,7 +74,7 @@ router.delete("/:attendanceId", (req: Request, res: Response) => {
     `DELETE FROM attendance WHERE attendanceId = ${attendanceId}`,
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Attendance Deleted.");
       }
@@ -95,7 +95,7 @@ router.put("/:id", (req: Request, res: Response) => {
     [isComing, date, excuseNote, id],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Attendance Updated.");
       }

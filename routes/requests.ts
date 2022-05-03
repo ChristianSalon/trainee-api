@@ -22,7 +22,7 @@ router.get("/:userId", (req: Request, res: Response) => {
     WHERE r.userId = "${userId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -38,7 +38,7 @@ router.post("/", (req: Request, res: Response) => {
     [request.teamId, request.userId, request.date],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Request added.");
       }
@@ -54,7 +54,7 @@ router.post("/acceptRequest/", (req: Request, res: Response) => {
     [request.requestId, request.teamId, request.userId],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Request accepted.");
       }

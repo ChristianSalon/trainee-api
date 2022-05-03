@@ -21,7 +21,7 @@ router.get("/:teamId", (req: Request, res: Response) => {
     WHERE t.teamId = "${teamId}";`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -38,7 +38,7 @@ router.put("/editRole/:userId", (req: Request, res: Response) => {
     [role, userId],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Role Updated.");
       }
@@ -55,7 +55,7 @@ router.delete("/:teamId/:userId", (req: Request, res: Response) => {
     [teamId, userId],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("User Deleted.");
       }

@@ -21,7 +21,7 @@ router.get("/:userId", (req: Request, res: Response) => {
     WHERE u.userId = "${userId}" AND cu.role = "MANAGER"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -38,7 +38,7 @@ router.post("/:userId", (req: Request, res: Response) => {
     [club.clubId, club.name, club.photoURL, userId, "MANAGER"],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Club Created.");
       }
@@ -51,7 +51,7 @@ router.delete("/:clubId", (req: Request, res: Response) => {
 
   connection.query(`CALL deleteClub(?)`, [clubId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Club Deleted.");
     }
@@ -68,7 +68,7 @@ router.put("/:clubId", (req: Request, res: Response) => {
     WHERE clubId = '${clubId}'`,
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Club Updated.");
       }

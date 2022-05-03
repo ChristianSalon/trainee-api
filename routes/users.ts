@@ -23,7 +23,7 @@ router.get("/team/:teamId/:search", (req: Request, res: Response) => {
     (SELECT userId FROM requests WHERE teamId = "${teamId}");`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -39,7 +39,7 @@ router.post("/", (req: Request, res: Response) => {
     [user.userId, user.name, user.photoURL, user.email],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New User Created.");
       }
@@ -56,7 +56,7 @@ router.put("/editName/:userId", (req: Request, res: Response) => {
     [name, userId],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("User Name Updated.");
       }

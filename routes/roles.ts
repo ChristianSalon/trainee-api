@@ -21,7 +21,7 @@ router.get("/team/:teamId/user/:userId", (req: Request, res: Response) => {
     teamId = "${teamId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         let roles: Roles = {
           isMember: false,
