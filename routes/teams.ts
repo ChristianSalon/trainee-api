@@ -10,13 +10,6 @@ const connection = mysql.createConnection({
   password: "password",
   database: "trainee",
 });
-connection.connect((err) => {
-  if (err) {
-    console.log("Connection error message: " + err.message);
-    return;
-  }
-  console.log("Connected!");
-});
 
 router.get("/:userId", (req: Request, res: Response) => {
   const userId = req.params.userId;

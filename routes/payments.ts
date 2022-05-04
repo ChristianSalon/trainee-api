@@ -95,8 +95,9 @@ router.post(
         paymentIntent = event.data.object;
         console.log("Payment succeeded");
         connection.query(
-          `UPDATE payments_users AS pu SET pu.settledAt = ?
+          `UPDATE payments_users AS pu 
           INNER JOIN users AS u ON pu.userId = u.userId
+          SET pu.settledAt = ?
           WHERE u.customerId = ? AND pu.paymentId = ?;`,
           [
             new Date().toISOString().split("T")[0],
