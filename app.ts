@@ -20,6 +20,7 @@ const usersRoute = require("./routes/users");
 const requestsRoute = require("./routes/requests");
 const rolesRoute = require("./routes/roles");
 const paymentsRoute = require("./routes/payments");
+const notificationsRoute = require("./routes/notifications");
 
 const paymentsAccountsRoute = require("./routes/payments/accounts");
 const paymentsAccountLinksRoute = require("./routes/payments/accountLinks");
@@ -39,6 +40,7 @@ app.use("/users", usersRoute);
 app.use("/requests", requestsRoute);
 app.use("/roles", rolesRoute);
 app.use("/payments", paymentsRoute);
+app.use("/notifications", notificationsRoute);
 
 app.use("/payments/accounts", paymentsAccountsRoute);
 app.use("/payments/accountLinks", paymentsAccountLinksRoute);

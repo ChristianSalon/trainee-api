@@ -9,6 +9,7 @@ import Payment from "./payment";
 import AccountInfo from "./accountInfo";
 import CustomerInfo from "./customerInfo";
 import PaymentInfo from "./paymentInfo";
+import NotificationToken from "./NotificationToken";
 
 export {
   Event,
@@ -22,4 +23,5 @@ export {
   AccountInfo,
   CustomerInfo,
   PaymentInfo,
+  NotificationToken,
 };

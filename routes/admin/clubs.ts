@@ -64,8 +64,9 @@ router.put("/:clubId", (req: Request, res: Response) => {
 
   connection.query(
     `UPDATE clubs 
-    SET name = '${club.name}', photoURL = '${club.photoURL}' 
-    WHERE clubId = '${clubId}'`,
+    SET name = ?, photoURL = ?
+    WHERE clubId = ?`,
+    [club.name, club.photoURL, clubId],
     (error) => {
       if (error) {
         res.status(500).send(error);
