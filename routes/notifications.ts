@@ -130,4 +130,49 @@ router.post("/teams", (req: Request, res: Response) => {
   );
 });
 
+router.post("/clubs", (req: Request, res: Response) => {
+  const body: {
+    clubId: string;
+    userId: string;
+    title: string;
+    body: string;
+  } = req.body;
+  let tokens;
+
+  connection.query(
+    `SELECT nt.token FROM notification_tokens AS nt
+    INNER JOIN teams_users AS tu ON nt.userId = tu.userId
+    INNER JOIN teams AS t ON tu.teamId = t.teamId
+    INNER JOIN clubs AS c ON c.clubId = t.clubId
+    WHERE c.clubId = ? AND nt.userId != ?
+    GROUP BY tu.userId;`,
+    [body.clubId, body.userId],
+    async (error, results) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        tokens = results.map((result) => result.token);
+        const response = await axios.post(
+          "https://exp.host/--/api/v2/push/send",
+          {
+            to: tokens,
+            title: body.title,
+            body: body.body,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.status === 200) {
+          res.send("Notifications sent");
+        } else {
+          res.status(500).send("Notifications failed to send");
+        }
+      }
+    }
+  );
+});
+
 module.exports = router;
