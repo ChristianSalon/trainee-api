@@ -18,7 +18,8 @@ router.get("/:eventId", (req: Request, res: Response) => {
   connection.query(
     `SELECT a.*, u.name, u.photoURL FROM attendance as a 
     INNER JOIN users AS u ON a.userId = u.userId 
-    WHERE a.eventId = "${eventId}"`,
+    WHERE a.eventId = "${eventId}"
+    ORDER BY a.date DESC;`,
     (error, results) => {
       if (error) {
         res.status(500).send(error);

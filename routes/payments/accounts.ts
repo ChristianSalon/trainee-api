@@ -40,7 +40,7 @@ router.post("/", async (req: Request, res: Response) => {
   });
 
   connection.query(
-    `UPDATE clubs SET accountId = "${account.id}" WHERE clubId = "${accountInfo.clubId}"`,
+    `UPDATE clubs SET accountId = "${account.id}", isAccountSetUp = 1 WHERE clubId = "${accountInfo.clubId}"`,
     [account.id],
     (error) => {
       if (error) {

@@ -19,7 +19,8 @@ router.get("/:teamId", (req: Request, res: Response) => {
     `SELECT e.* FROM events_teams as et 
     INNER JOIN events AS e ON et.eventId = e.eventId 
     INNER JOIN teams AS t ON et.teamId = t.teamId 
-    WHERE et.teamId = "${teamId}"`,
+    WHERE et.teamId = "${teamId}"
+    ORDER BY e.startDate DESC;`,
     (error, results) => {
       if (error) {
         res.status(500).send(error);

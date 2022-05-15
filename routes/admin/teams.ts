@@ -19,7 +19,8 @@ router.get("/club/:clubId/user/:userId", (req: Request, res: Response) => {
     `SELECT t.teamId, t.clubId, t.name, t.photoURL FROM teams_users AS tu 
     INNER JOIN teams AS t ON tu.teamId = t.teamId 
     INNER JOIN users AS u ON tu.userId = u.userId 
-    WHERE u.userId = ? AND tu.role = ? AND t.clubId = ?;`,
+    WHERE u.userId = ? AND tu.role = ? AND t.clubId = ?
+    ORDER BY t.name ASC;`,
     [userId, "MANAGER", clubId],
     (error, results) => {
       if (error) {

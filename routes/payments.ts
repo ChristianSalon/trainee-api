@@ -28,7 +28,7 @@ router.get("/team/:teamId/user/:userId", (req: Request, res: Response) => {
     INNER JOIN clubs AS c ON t.clubId = c.clubId 
     WHERE pt.teamId = "${teamId}" AND pu.userId = "${userId}"
     GROUP BY p.paymentId
-    ORDER BY p.dueDate DESC`,
+    ORDER BY p.dueDate DESC;`,
     (error, results) => {
       if (error) {
         res.status(500).send(error);

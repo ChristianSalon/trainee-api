@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Request, Response } from "express";
 import { Event } from "../types";
 

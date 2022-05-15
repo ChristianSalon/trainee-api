@@ -18,7 +18,8 @@ router.get("/:teamId", (req: Request, res: Response) => {
     `SELECT u.*, t.teamId, tu.role FROM teams_users AS tu 
     INNER JOIN teams AS t ON tu.teamId = t.teamId 
     INNER JOIN users AS u ON tu.userId = u.userId 
-    WHERE t.teamId = "${teamId}";`,
+    WHERE t.teamId = "${teamId}"
+    ORDER BY u.name ASC;`,
     (error, results) => {
       if (error) {
         res.status(500).send(error);
