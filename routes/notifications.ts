@@ -100,7 +100,7 @@ router.post("/teams", (req: Request, res: Response) => {
     `SELECT nt.token FROM notification_tokens AS nt
     INNER JOIN teams_users AS tu ON nt.userId = tu.userId
     WHERE tu.teamId IN (?) AND tu.userId != ?
-    GROUP BY tu.userId;`,
+    GROUP BY nt.token;`,
     [body.teamIds, body.userId],
     async (error, results) => {
       if (error) {
@@ -145,7 +145,7 @@ router.post("/clubs", (req: Request, res: Response) => {
     INNER JOIN teams AS t ON tu.teamId = t.teamId
     INNER JOIN clubs AS c ON c.clubId = t.clubId
     WHERE c.clubId = ? AND nt.userId != ?
-    GROUP BY tu.userId;`,
+    GROUP BY nt.token;`,
     [body.clubId, body.userId],
     async (error, results) => {
       if (error) {
