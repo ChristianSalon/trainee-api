@@ -22,8 +22,8 @@ router.get("/:teamId", (req: Request, res: Response) => {
     FROM events_teams AS et 
     INNER JOIN events AS e ON et.eventId = e.eventId 
     INNER JOIN teams AS t ON et.teamId = t.teamId 
-    WHERE e.startDate >= DATE_SUB(?, INTERVAL 1 MONTH)
-    AND e.startDate <= DATE_SUB(?, INTERVAL -1 MONTH)
+    WHERE e.startDate >= DATE_SUB(?, INTERVAL 2 MONTH)
+    AND e.startDate <= DATE_SUB(?, INTERVAL -2 MONTH)
     GROUP BY et.eventId 
     HAVING teamIds LIKE "%${teamId}%"
     ORDER BY e.startDate ASC;`,
