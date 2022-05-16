@@ -175,4 +175,21 @@ router.post("/clubs", (req: Request, res: Response) => {
   );
 });
 
+router.delete("/user/:userId/token/:token", (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const token = req.params.token;
+
+  connection.query(
+    `DELETE FROM notification_tokens WHERE userId = ? AND token = ?;`,
+    [userId, token],
+    (error, results) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        res.send("Notification token deleted.");
+      }
+    }
+  );
+});
+
 module.exports = router;
