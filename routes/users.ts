@@ -64,4 +64,21 @@ router.put("/editName/:userId", (req: Request, res: Response) => {
   );
 });
 
+router.put("/editPhoto/:userId", (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const photoURL: string = req.body.photoURL;
+
+  connection.query(
+    `UPDATE users SET photoURL = ? WHERE userId = ?`,
+    [photoURL, userId],
+    (error) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        res.send("Profile photo updated.");
+      }
+    }
+  );
+});
+
 module.exports = router;
