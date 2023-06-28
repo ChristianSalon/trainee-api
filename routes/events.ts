@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Request, Response } from "express";
 import { Event } from "../types";
 
@@ -6,24 +7,30 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
 router.get("/:teamId", (req: Request, res: Response) => {
   const teamId = req.params.teamId;
+  const date = req.query.date;
 
   connection.query(
-    `SELECT e.* FROM events_teams as et 
+    `SELECT e.*, group_concat(t.teamId) AS "teamIds", GROUP_CONCAT(t.name SEPARATOR ', ') AS "teamsString" 
+    FROM events_teams AS et 
     INNER JOIN events AS e ON et.eventId = e.eventId 
     INNER JOIN teams AS t ON et.teamId = t.teamId 
-    WHERE et.teamId = "${teamId}" 
-    ORDER BY e.startDate ASC`,
+    WHERE e.startDate >= DATE_SUB(?, INTERVAL 2 MONTH)
+    AND e.startDate <= DATE_SUB(?, INTERVAL -2 MONTH)
+    GROUP BY et.eventId 
+    HAVING teamIds LIKE "%${teamId}%"
+    ORDER BY e.startDate ASC;`,
+    [date, date],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -31,27 +38,11 @@ router.get("/:teamId", (req: Request, res: Response) => {
   );
 });
 
-router.get("/teams/:clubId", (req: Request, res: Response) => {
-  const clubId = req.params.clubId;
-
-  connection.query(
-    `SELECT teamId, name FROM teams WHERE clubId = "${clubId}"`,
-    (error, results) => {
-      if (error) {
-        console.log(error);
-      } else {
-        res.send(results);
-      }
-    }
-  );
-});
-
-router.post("/:teamId", (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
+router.post("/", (req: Request, res: Response) => {
   const event: Event = req.body;
 
   connection.query(
-    `CALL createEvent(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `CALL createEvent(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       event.eventId,
       event.name,
@@ -62,12 +53,22 @@ router.post("/:teamId", (req: Request, res: Response) => {
       event.endTime,
       event.startDate,
       event.endDate,
-      teamId,
     ],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
+        event.teams.forEach((teamId) => {
+          connection.query(
+            `INSERT INTO events_teams (teamId, eventId) VALUES (?, ?);`,
+            [teamId, event.eventId],
+            (err) => {
+              if (err) {
+                console.log(err);
+              }
+            }
+          );
+        });
         res.send("New Event Created.");
       }
     }
@@ -79,7 +80,7 @@ router.delete("/:eventId", (req: Request, res: Response) => {
 
   connection.query(`CALL deleteEvent(?)`, [eventId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Event Deleted.");
     }
@@ -104,7 +105,7 @@ router.put("/:eventId", (req: Request, res: Response) => {
     ],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Event Updated.");
       }

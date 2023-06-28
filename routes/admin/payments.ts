@@ -5,23 +5,27 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
-router.get("/team/:teamId", (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
+router.get("/club/:clubId", (req: Request, res: Response) => {
+  const clubId = req.params.clubId;
 
   connection.query(
-    `SELECT p.*, pt.teamId FROM payments_teams AS pt 
+    `SELECT p.*, GROUP_CONCAT(t.teamId SEPARATOR ', ') AS "teamIds" FROM payments_teams AS pt 
     INNER JOIN payments AS p ON pt.paymentId = p.paymentId 
-    WHERE pt.teamId = '${teamId}' 
-    ORDER BY p.dueDate DESC`,
+    INNER JOIN teams AS t ON pt.teamId = t.teamId 
+    INNER JOIN clubs AS c ON t.clubId = c.clubId 
+    WHERE c.clubId = ? 
+    GROUP BY p.paymentId 
+    ORDER BY p.dueDate DESC;`,
+    [clubId],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -39,7 +43,26 @@ router.get("/teams/:userId", (req: Request, res: Response) => {
     WHERE u.userId = "${userId}" AND tu.role = "MANAGER"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
+      } else {
+        res.send(results);
+      }
+    }
+  );
+});
+
+router.get("/:paymentId", (req: Request, res: Response) => {
+  const paymentId = req.params.paymentId;
+
+  connection.query(
+    `SELECT pu.id, u.name, u.photoURL, pu.settledAt FROM payments_users AS pu
+    INNER JOIN users AS u ON pu.userId = u.userId
+    WHERE pu.paymentId = ?
+    GROUP BY u.userId;`,
+    [paymentId],
+    (error, results) => {
+      if (error) {
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -52,33 +75,20 @@ router.post("/", (req: Request, res: Response) => {
   let paymentId;
 
   connection.query(
-    `INSERT INTO payments (name, details, amount, createdAt, dueDate) 
-    VALUES (?, ?, ?, ?, ?)`,
+    `CALL createPayment(?, ?, ?, ?, ?, ?);`,
     [
       payment.name,
       payment.details,
       payment.amount,
       payment.createdAt,
       payment.dueDate,
+      payment.teamIds,
     ],
     (error, result) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
-        paymentId = result.insertId;
         res.send("New Payment Created.");
-
-        payment.teams.forEach((teamId) => {
-          connection.query(
-            `INSERT INTO payments_teams (paymentId, teamId) VALUES (?, ?)`,
-            [paymentId, teamId],
-            (err) => {
-              if (err) {
-                console.log(err);
-              }
-            }
-          );
-        });
       }
     }
   );
@@ -89,7 +99,7 @@ router.delete("/:paymentId", (req: Request, res: Response) => {
 
   connection.query(`CALL deletePayment(?)`, [paymentId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Payment Deleted.");
     }
@@ -107,7 +117,7 @@ router.put("/:paymentId", (req: Request, res: Response) => {
     [payment.name, payment.details, payment.amount, payment.dueDate],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Payment Updated.");
       }

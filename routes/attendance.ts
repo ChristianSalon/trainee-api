@@ -6,10 +6,10 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
 router.get("/:eventId", (req: Request, res: Response) => {
@@ -18,10 +18,11 @@ router.get("/:eventId", (req: Request, res: Response) => {
   connection.query(
     `SELECT a.*, u.name, u.photoURL FROM attendance as a 
     INNER JOIN users AS u ON a.userId = u.userId 
-    WHERE a.eventId = "${eventId}"`,
+    WHERE a.eventId = "${eventId}"
+    ORDER BY a.date DESC;`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -37,7 +38,7 @@ router.get("/myAttendance/:userId", (req: Request, res: Response) => {
     WHERE userId = "${userId}"`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -49,16 +50,17 @@ router.post("/", (req: Request, res: Response) => {
   const attendance: Attendance = req.body;
 
   connection.query(
-    `INSERT INTO attendance (userId, eventId, isComing, date) VALUES (?, ?, ?, ?)`,
+    `INSERT INTO attendance (userId, eventId, isComing, date, excuseNote) VALUES (?, ?, ?, ?, ?)`,
     [
       attendance.userId,
       attendance.eventId,
       attendance.isComing,
       attendance.date,
+      attendance.excuseNote,
     ],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Attendance Created.");
       }
@@ -73,7 +75,7 @@ router.delete("/:attendanceId", (req: Request, res: Response) => {
     `DELETE FROM attendance WHERE attendanceId = ${attendanceId}`,
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Attendance Deleted.");
       }
@@ -85,14 +87,16 @@ router.put("/:id", (req: Request, res: Response) => {
   const id = req.params.id;
   const isComing: boolean = req.body.isComing;
   const date: string = req.body.date;
+  const excuseNote: string = req.body.excuseNote;
 
   connection.query(
     `UPDATE attendance 
-    SET isComing = ${isComing}, date = '${date}' 
-    WHERE id = ${id}`,
+    SET isComing = ?, date = ?, excuseNote = ? 
+    WHERE id = ?;`,
+    [isComing, date, excuseNote, id],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Attendance Updated.");
       }

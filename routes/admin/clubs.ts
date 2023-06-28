@@ -5,23 +5,24 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
 router.get("/:userId", (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   connection.query(
-    `SELECT c.clubId, c.name, c.photoURL FROM clubs_users AS cu 
+    `SELECT c.* FROM clubs_users AS cu 
     INNER JOIN clubs AS c ON cu.clubId = c.clubId 
     INNER JOIN users AS u ON cu.userId = u.userId 
-    WHERE u.userId = "${userId}" AND cu.role = "MANAGER"`,
+    WHERE u.userId = "${userId}" AND cu.role = "MANAGER"
+    ORDER BY c.name ASC;`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -38,7 +39,7 @@ router.post("/:userId", (req: Request, res: Response) => {
     [club.clubId, club.name, club.photoURL, userId, "MANAGER"],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Club Created.");
       }
@@ -51,7 +52,7 @@ router.delete("/:clubId", (req: Request, res: Response) => {
 
   connection.query(`CALL deleteClub(?)`, [clubId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Club Deleted.");
     }
@@ -64,11 +65,12 @@ router.put("/:clubId", (req: Request, res: Response) => {
 
   connection.query(
     `UPDATE clubs 
-    SET name = '${club.name}', photoURL = '${club.photoURL}' 
-    WHERE clubId = '${clubId}'`,
+    SET name = ?, photoURL = ?
+    WHERE clubId = ?`,
+    [club.name, club.photoURL, clubId],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Club Updated.");
       }

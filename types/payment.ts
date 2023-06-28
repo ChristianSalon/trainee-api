@@ -1,6 +1,7 @@
 interface Payment {
   paymentId: number;
-  teams: string[];
+  teams?: string[];
+  teamIds?: string;
   name: string;
   details: string;
   amount: number;

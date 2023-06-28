@@ -5,23 +5,25 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
 router.get("/:userId", (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   connection.query(
-    `SELECT r.*, t.name AS teamName, t.photoURL AS teamPhotoURL 
+    `SELECT r.*, t.name AS teamName, t.photoURL AS teamPhotoURL, c.name AS clubName  
     FROM requests AS r 
     INNER JOIN teams AS t ON r.teamId = t.teamId 
-    WHERE r.userId = "${userId}"`,
+    INNER JOIN clubs AS c ON t.clubId = c.clubId 
+    WHERE r.userId = "${userId}"
+    ORDER BY r.date DESC;`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -33,11 +35,11 @@ router.post("/", (req: Request, res: Response) => {
   const request: Req = req.body;
 
   connection.query(
-    `INSERT INTO requests (teamId, userId, role, date) VALUES (?, ?, ?, ?)`,
-    [request.teamId, request.userId, request.role, request.date],
+    `INSERT INTO requests (teamId, userId, date) VALUES (?, ?, ?)`,
+    [request.teamId, request.userId, request.date],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Request added.");
       }
@@ -49,11 +51,11 @@ router.post("/acceptRequest/", (req: Request, res: Response) => {
   const request = req.body;
 
   connection.query(
-    `CALL acceptRequest(?, ?, ?, ?)`,
-    [request.requestId, request.teamId, request.userId, request.role],
+    `CALL acceptRequest(?, ?, ?)`,
+    [request.requestId, request.teamId, request.userId],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Request accepted.");
       }

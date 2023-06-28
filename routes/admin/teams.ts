@@ -5,23 +5,26 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
-router.get("/:userId", (req: Request, res: Response) => {
+router.get("/club/:clubId/user/:userId", (req: Request, res: Response) => {
+  const clubId = req.params.clubId;
   const userId = req.params.userId;
 
   connection.query(
     `SELECT t.teamId, t.clubId, t.name, t.photoURL FROM teams_users AS tu 
     INNER JOIN teams AS t ON tu.teamId = t.teamId 
     INNER JOIN users AS u ON tu.userId = u.userId 
-    WHERE u.userId = "${userId}" AND tu.role = "MANAGER"`,
+    WHERE u.userId = ? AND tu.role = ? AND t.clubId = ?
+    ORDER BY t.name ASC;`,
+    [userId, "MANAGER", clubId],
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
       }
@@ -38,7 +41,7 @@ router.post("/:userId", (req: Request, res: Response) => {
     [team.teamId, team.clubId, team.name, team.photoURL, userId, "MANAGER"],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("New Team Created.");
       }
@@ -51,7 +54,7 @@ router.delete("/:teamId", (req: Request, res: Response) => {
 
   connection.query(`CALL deleteTeam(?)`, [teamId], (error) => {
     if (error) {
-      console.log(error);
+      res.status(500).send(error);
     } else {
       res.send("Team Deleted.");
     }
@@ -68,7 +71,7 @@ router.put("/:teamId", (req: Request, res: Response) => {
     WHERE teamId = '${teamId}'`,
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("Team Updated.");
       }

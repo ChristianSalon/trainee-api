@@ -5,10 +5,10 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "chris",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
 router.get("/:teamId", (req: Request, res: Response) => {
@@ -18,12 +18,30 @@ router.get("/:teamId", (req: Request, res: Response) => {
     `SELECT u.*, t.teamId, tu.role FROM teams_users AS tu 
     INNER JOIN teams AS t ON tu.teamId = t.teamId 
     INNER JOIN users AS u ON tu.userId = u.userId 
-    WHERE tu.role = "MEMBER"`,
+    WHERE t.teamId = "${teamId}"
+    ORDER BY u.name ASC;`,
     (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send(results);
+      }
+    }
+  );
+});
+
+router.put("/editRole/:userId", (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const role = req.body.role;
+
+  connection.query(
+    `UPDATE teams_users SET role = ? WHERE userId = ?;`,
+    [role, userId],
+    (error, results) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        res.send("Role Updated.");
       }
     }
   );
@@ -34,11 +52,11 @@ router.delete("/:teamId/:userId", (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   connection.query(
-    `DELETE FROM teams_users WHERE team_id = ? AND userId = ?`,
+    `DELETE FROM teams_users WHERE teamId = ? AND userId = ?`,
     [teamId, userId],
     (error) => {
       if (error) {
-        console.log(error);
+        res.status(500).send(error);
       } else {
         res.send("User Deleted.");
       }
