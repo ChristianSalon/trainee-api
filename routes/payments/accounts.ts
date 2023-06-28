@@ -6,15 +6,13 @@ const mysql = require("mysql");
 const router = express.Router();
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "salonc",
-  password: "password",
-  database: "trainee",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB,
 });
 
-const stripe = require("stripe")(
-  "sk_test_51KqHnWBPMHj98s1MnAX7sZJ6CfY8VvroBEd1MwCD3yGCdUcvFT4IGq3sBP8TT7iXPI41LXO00AvkuBENuyFbaJQe00V74iJtSk"
-);
+const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 router.post("/", async (req: Request, res: Response) => {
   const accountInfo: AccountInfo = req.body;
