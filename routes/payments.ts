@@ -68,8 +68,7 @@ router.post("/", async (req, res) => {
   });
 });
 
-const endpointSecret =
-  "whsec_6f29225af218d3934f6c63bc57b4c18bfa5fef6f1a718d4123ae28443e7374de";
+const endpointSecret = process.env.STRIPE_PAYMENT_SECRET;
 
 router.post(
   "/succeeded",
